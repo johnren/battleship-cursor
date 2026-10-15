@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { cellsForPlacement, canPlace, placeFleetRandomly, placeShip } from './placement.ts'
+import {
+  cellsForPlacement,
+  canPlace,
+  placeFleetRandomly,
+  placeShip,
+  visiblePreviewCells,
+} from './placement.ts'
 import { createRng } from './rng.ts'
 import { SHIP_DEFS } from './ships.ts'
 import { occupiedKeys } from './board.ts'
@@ -34,6 +40,15 @@ describe('cellsForPlacement', () => {
     expect(cellsForPlacement({ row: 9, col: 0 }, 2, 'vertical')).toBeNull()
     expect(cellsForPlacement({ row: 8, col: 4 }, 3, 'vertical')).toBeNull()
     expect(cellsForPlacement({ row: 6, col: 9 }, 5, 'vertical')).toBeNull()
+  })
+
+  it('previews only on-board cells when a ship hangs off the edge', () => {
+    expect(visiblePreviewCells({ row: 0, col: 9 }, 2, 'horizontal')).toEqual([
+      { row: 0, col: 9 },
+    ])
+    expect(visiblePreviewCells({ row: 9, col: 0 }, 3, 'vertical')).toEqual([
+      { row: 9, col: 0 },
+    ])
   })
 
   it('does not wrap from column 10 to column 1', () => {
