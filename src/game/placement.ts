@@ -20,6 +20,23 @@ export function cellsForPlacement(
   return cells
 }
 
+/** On-board cells a placement would cover, even when the rest hangs off the edge. */
+export function visiblePreviewCells(
+  origin: Coord,
+  length: number,
+  orientation: Orientation,
+): Coord[] {
+  const cells: Coord[] = []
+  for (let i = 0; i < length; i++) {
+    const cell: Coord = {
+      row: orientation === 'vertical' ? origin.row + i : origin.row,
+      col: orientation === 'horizontal' ? origin.col + i : origin.col,
+    }
+    if (inBounds(cell)) cells.push(cell)
+  }
+  return cells
+}
+
 export function canPlace(
   existing: PlacedShip[],
   origin: Coord,
