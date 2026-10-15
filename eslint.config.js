@@ -5,7 +5,7 @@ import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist', 'tmp-vite'] },
+  { ignores: ['dist', 'tmp-vite', 'e2e', 'playwright.config.ts'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
