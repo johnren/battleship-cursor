@@ -7,4 +7,4 @@
 - **Fix:** Disable an enemy cell once it has a shot mark.
 - **Found:** Manual play of a seeded game in the browser.
 - **Test:** End-to-end smoke test fires only untried cells and plays through to game over. Reducer already rejects a repeated shot without consuming a turn.
-- **Fixed in:** (commit after this note is committed with the Board change)
+- **Fixed in:** 41274ee
