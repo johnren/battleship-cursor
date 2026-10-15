@@ -67,6 +67,7 @@ export function Board({
             const preview = inPreview ? (previewValid ? 'valid' : 'invalid') : null
             const alreadyFired = shot !== null
             const canFire = clickable && side === 'enemy' && !alreadyFired
+            const enabled = clickable && (side !== 'enemy' || !alreadyFired)
             const classes = ['cell']
             if (revealShips && hasShip && !shot) classes.push('cell-ship')
             if (shot === 'miss') classes.push('cell-miss')
@@ -91,7 +92,7 @@ export function Board({
                 role="gridcell"
                 className={classes.join(' ')}
                 aria-label={label}
-                disabled={!clickable}
+                disabled={!enabled}
                 onPointerEnter={(event) => {
                   if (event.pointerType === 'mouse') onHover?.(coord)
                 }}

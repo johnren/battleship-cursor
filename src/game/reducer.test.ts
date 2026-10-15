@@ -40,6 +40,31 @@ describe('gameReducer', () => {
     expect(blocked.playerShotsFired).toBe(shots)
   })
 
+  it('plays until one side sinks the entire fleet', () => {
+    let state = startedGame(11)
+    let guard = 0
+    while (state.phase === 'battle' && guard < 200) {
+      guard += 1
+      if (state.turn === 'player') {
+        let next: { row: number; col: number } | null = null
+        for (let row = 0; row < 10 && !next; row++) {
+          for (let col = 0; col < 10 && !next; col++) {
+            if (!state.enemyBoard.shots[row]?.[col]) {
+              next = { row, col }
+            }
+          }
+        }
+        if (!next) break
+        state = gameReducer(state, { type: 'PLAYER_FIRE', coord: next })
+      } else {
+        state = gameReducer(state, { type: 'COMPUTER_FIRE' })
+      }
+    }
+    expect(state.phase).toBe('over')
+    expect(state.winner === 'player' || state.winner === 'computer').toBe(true)
+    expect(state.playerShotsFired).toBeGreaterThan(0)
+  })
+
   it('Play Again fully resets state, including a pending computer move', () => {
     let state = startedGame(42)
     const enemyShips = state.enemyBoard.ships
