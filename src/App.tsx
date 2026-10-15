@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { Board } from './components/Board.tsx'
 import { FleetStatus } from './components/FleetStatus.tsx'
+import { GameOver } from './components/GameOver.tsx'
 import { Header } from './components/Header.tsx'
 import { MessageLog } from './components/MessageLog.tsx'
 import { PlacementBar } from './components/PlacementBar.tsx'
@@ -16,6 +17,8 @@ import {
   type ShipId,
 } from './game/index.ts'
 
+const COMPUTER_TURN_MS = 600
+
 function readSeed(): number {
   if (typeof window === 'undefined') return 1
   return parseSeed(window.location.search)
@@ -29,6 +32,7 @@ export default function App() {
   const pointerType = useRef<'mouse' | 'touch' | 'pen'>('mouse')
 
   const placing = state.phase === 'placement'
+  const playerTurn = state.phase === 'battle' && state.turn === 'player'
   const selected = SHIP_DEFS.find((ship) => ship.id === state.selectedShipId)
   const previewOrigin = hover ?? touchPreview
   const previewCells =
@@ -41,7 +45,8 @@ export default function App() {
 
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
-      pointerType.current = event.pointerType === 'touch' ? 'touch' : event.pointerType === 'pen' ? 'pen' : 'mouse'
+      pointerType.current =
+        event.pointerType === 'touch' ? 'touch' : event.pointerType === 'pen' ? 'pen' : 'mouse'
     }
     window.addEventListener('pointerdown', onPointerDown)
     return () => window.removeEventListener('pointerdown', onPointerDown)
@@ -59,6 +64,14 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKeyDown, true)
   }, [placing])
 
+  useEffect(() => {
+    if (state.phase !== 'battle' || state.turn !== 'computer') return
+    const timer = window.setTimeout(() => {
+      dispatch({ type: 'COMPUTER_FIRE' })
+    }, COMPUTER_TURN_MS)
+    return () => window.clearTimeout(timer)
+  }, [state.phase, state.turn, state.computerMoveNonce])
+
   function onPlayerPress(coord: Coord) {
     if (!placing) return
     if (pointerType.current === 'touch' || pointerType.current === 'pen') {
@@ -70,6 +83,16 @@ export default function App() {
     }
     if (!selected || !canPlaceSelected(state, coord)) return
     dispatch({ type: 'PLACE_SHIP', origin: coord })
+    setTouchPreview(null)
+    setHover(null)
+  }
+
+  function onEnemyPress(coord: Coord) {
+    dispatch({ type: 'PLAYER_FIRE', coord })
+  }
+
+  function onPlayAgain() {
+    dispatch({ type: 'PLAY_AGAIN' })
     setTouchPreview(null)
     setHover(null)
   }
@@ -121,13 +144,22 @@ export default function App() {
             side="enemy"
             board={state.enemyBoard}
             revealShips={state.phase === 'over'}
-            interactive={false}
-            locked
+            interactive={playerTurn}
+            locked={!playerTurn}
+            onPress={onEnemyPress}
           />
           <FleetStatus ships={state.enemyBoard.ships} />
         </div>
       </div>
       <MessageLog entries={state.log} />
+      {state.phase === 'over' && state.winner ? (
+        <GameOver
+          winner={state.winner}
+          shotsFired={state.playerShotsFired}
+          hits={state.playerHits}
+          onPlayAgain={onPlayAgain}
+        />
+      ) : null}
     </div>
   )
 }

@@ -96,12 +96,6 @@ h2 {
   animation: pulse 1.2s ease-in-out infinite;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .pulse-dot {
-    animation: none;
-  }
-}
-
 @keyframes pulse {
   0%,
   100% {
@@ -251,6 +245,8 @@ h2 {
 }
 
 .cell {
+  display: grid;
+  place-items: center;
   aspect-ratio: 1;
   min-width: 0;
   padding: 0;
@@ -259,6 +255,7 @@ h2 {
   color: var(--hit);
   position: relative;
   cursor: default;
+  touch-action: manipulation;
 }
 
 .cell-ship {
@@ -275,6 +272,7 @@ h2 {
 
 .cell-sunk {
   background: var(--sunk);
+  animation: sunk-flash 350ms ease-out;
 }
 
 .cell-preview-valid {
@@ -286,6 +284,7 @@ h2 {
 }
 
 .cell-target:hover,
+.cell-target:focus,
 .cell-target:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: -2px;
@@ -305,12 +304,54 @@ h2 {
   border-radius: 50%;
   background: var(--miss);
   transform: translate(-50%, -50%);
+  animation: miss-in 150ms ease-out;
 }
 
 .hit-mark {
   font-weight: 800;
   font-size: clamp(12px, 4.5vw, 18px);
   line-height: 1;
+  animation: hit-in 150ms ease-out;
+}
+
+@keyframes miss-in {
+  from {
+    transform: translate(-50%, -50%) scale(0.35);
+    opacity: 0.2;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes hit-in {
+  from {
+    transform: scale(0.35);
+    opacity: 0.2;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes sunk-flash {
+  0% {
+    filter: brightness(1.8);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .miss-dot,
+  .hit-mark,
+  .cell-sunk,
+  .pulse-dot {
+    animation: none;
+  }
 }
 
 .fleet-status {
@@ -381,6 +422,35 @@ h2 {
 
 .log-empty {
   color: var(--text-muted);
+}
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgb(11 23 38 / 72%);
+  z-index: 20;
+}
+
+.dialog {
+  width: min(100%, 360px);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 12px 40px rgb(0 0 0 / 35%);
+}
+
+.dialog p {
+  margin: 8px 0;
+  color: var(--text-muted);
+}
+
+.dialog .btn-primary {
+  margin-top: 12px;
+  width: 100%;
 }
 
 @media (max-width: 640px) {
